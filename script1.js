@@ -1,35 +1,10 @@
-$(".landing").on("click", ".landingbutton", function () {
-
-    $landing = $(this).parent();
-    $landing.hide();
-    $("#mainPage").show();
-
-});
-
-$("#buttonDislike").click(function () {
-    library.dislike();
-    if (library.nextbook() === false) {
-         $("#mainPage").hide();
-         $("#endPage").show();
-         Stats();
-    }
-});
-$("#buttonLike").click(function () {
-    library.like();
-    if (library.nextbook() === false) {
-         $("#mainPage").hide();
-         $("#endPage").show();
-         Stats();
-    }
-});
-
-function Book(title, description, cover, linkWikipedia, linkComprar) {
+function Book(title, description, thumbnail, linkInfo, linkBuy) {
     
     this.title = title;
     this.description = description;
-    this.cover = cover;
-    this.linkWikipedia = linkWikipedia;
-    this.linkComprar = linkComprar;
+    this.thumbnail = thumbnail;
+    this.linkInfo = linkInfo;
+    this.linkBuy = linkBuy;
     this.like = 0;
     this.dislike = 0; 
 
@@ -37,9 +12,9 @@ function Book(title, description, cover, linkWikipedia, linkComprar) {
 
         $("#title").html(this.title);
         $("#description").html(this.description);
-        $("#cover").attr("src", this.cover);
-        $("a.linkWikipedia").attr("href", this.linkWikipedia);
-        $("a.linkComprar").attr("href", this.linkComprar);
+        $("#cover").attr("src", this.thumbnail);
+        $(".linkInfo").attr("href", this.linkInfo);
+        $(".linkBuy").attr("href", this.linkBuy);
     }
 }
 
@@ -81,18 +56,40 @@ function Library() {
         this.actualBook.dislike++;
     }
 }
+var library = null;
+function init() {
+    var paramPesquisa = 'spiderman';
+    var URL = "https://www.googleapis.com/books/v1/volumes?q=" +encodeURI(paramPesquisa);
+    $.get(URL).done(function(data) {
+        library = new Library();
+        for(var i=0; i<data.items.length; i++){
+            var baseDados = data.items[i];
+            var title = baseDados.volumeInfo.title;
+            var thumbnail = baseDados.volumeInfo.imageLinks.thumbnail;
+            var description = baseDados.volumeInfo.description; 
+            var linkBuy = baseDados.saleInfo.buyLink;
+            var linkInfo = baseDados.volumeInfo.infoLink; 
+            var book = new Book (title, description, thumbnail, linkInfo, linkBuy);
+            library.addBook(book);
+        }
+        library.nextbook();
+    }).fail(function(data) {
+        console.log(data);
+    })
 
-var book1 = new Book("Harry Potter e a Pedra Filosofal", "A boy who learns on his eleventh birthday that he is the orphaned son of two powerful wizards and possesses unique magical powers of his own. He is summoned from his life as an unwanted child to become a student at Hogwarts, an English boarding school for wizards. There, he meets several friends who become his closest allies and help him discover the truth about his parents' mysterious deaths.", "http://ecx.images-amazon.com/images/I/51eqYMqRNpL._SX332_BO1,204,203,200_.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher's_Stone", "https://www.wook.pt/livro/harry-potter-e-a-pedra-filosofal-j-k-rowling/46725")
-var book2 = new Book("Harry Potter e a Camara dos Segredos", "Harry Potter and his friends, Ron and Hermione, facing new challenges during their second year at Hogwarts School of Witchcraft and Wizardry as they try to discover a dark force that is terrorizing the school.", "https://images-na.ssl-images-amazon.com/images/I/51jNORv6nQL.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Chamber_of_Secrets", "https://www.wook.pt/livro/harry-potter-e-a-camara-dos-segredos-j-k-rowling/46758")
-var book3 = new Book("Harry Potter e o Prisioneiro de Azkaban", "The book follows Harry Potter, a young wizard, in his third year at Hogwarts School of Witchcraft and Wizardry. Along with friends Ron Weasley and Hermione Granger, Harry investigates Sirius Black, an escaped prisoner from Azkaban who they believe is one of Lord Voldemort's old allies.", "http://harrypotteraudiobooks.org/wp-content/uploads/2015/10/harry-potter-and-the-prisoner-of-azkaban-free-audiobook-download.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Prisoner_of_Azkaban", "https://www.wook.pt/livro/harry-potter-e-o-prisioneiro-de-azkaban-j-k-rowling/46787")
+}
 
-var library = new Library();
+init();
 
-library.addBook(book1);
-library.addBook(book2);
-library.addBook(book3);
+// var book1 = new Book("Harry Potter e a Pedra Filosofal", "A boy who learns on his eleventh birthday that he is the orphaned son of two powerful wizards and possesses unique magical powers of his own. He is summoned from his life as an unwanted child to become a student at Hogwarts, an English boarding school for wizards. There, he meets several friends who become his closest allies and help him discover the truth about his parents' mysterious deaths.", "http://ecx.images-amazon.com/images/I/51eqYMqRNpL._SX332_BO1,204,203,200_.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher's_Stone", "https://www.wook.pt/livro/harry-potter-e-a-pedra-filosofal-j-k-rowling/46725")
+// var book2 = new Book("Harry Potter e a Camara dos Segredos", "Harry Potter and his friends, Ron and Hermione, facing new challenges during their second year at Hogwarts School of Witchcraft and Wizardry as they try to discover a dark force that is terrorizing the school.", "https://images-na.ssl-images-amazon.com/images/I/51jNORv6nQL.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Chamber_of_Secrets", "https://www.wook.pt/livro/harry-potter-e-a-camara-dos-segredos-j-k-rowling/46758")
+// var book3 = new Book("Harry Potter e o Prisioneiro de Azkaban", "The book follows Harry Potter, a young wizard, in his third year at Hogwarts School of Witchcraft and Wizardry. Along with friends Ron Weasley and Hermione Granger, Harry investigates Sirius Black, an escaped prisoner from Azkaban who they believe is one of Lord Voldemort's old allies.", "http://harrypotteraudiobooks.org/wp-content/uploads/2015/10/harry-potter-and-the-prisoner-of-azkaban-free-audiobook-download.jpg", "https://en.wikipedia.org/wiki/Harry_Potter_and_the_Prisoner_of_Azkaban", "https://www.wook.pt/livro/harry-potter-e-o-prisioneiro-de-azkaban-j-k-rowling/46787")
 
-library.nextbook();
+// var library = new Library();
+
+// library.addBook(book1);
+// library.addBook(book2);
+// library.addBook(book3);
 
 function Stats() {
     var totalLikes = 0;
@@ -123,4 +120,27 @@ function Stats() {
     $("#contador2").text(totalDislikes);
 }
 
+$(".landing").on("click", ".landingbutton", function () {
 
+    $landing = $(this).parent();
+    $landing.hide();
+    $("#mainPage").show();
+
+});
+
+$("#buttonDislike").click(function () {
+    library.dislike();
+    if (library.nextbook() === false) {
+         $("#mainPage").hide();
+         $("#endPage").show();
+         Stats();
+    }
+});
+$("#buttonLike").click(function () {
+    library.like();
+    if (library.nextbook() === false) {
+         $("#mainPage").hide();
+         $("#endPage").show();
+         Stats();
+    }
+});
